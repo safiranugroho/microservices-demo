@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/microservices-demo/microservices-demo.svg?branch=master)](https://travis-ci.org/microservices-demo/microservices-demo)
 
-# Sock Shop : A Microservice Demo Application
+# Sock Shop: A Microservice Demo Application
 
 The application is the user-facing part of an online shop that sells socks. It is intended to aid the demonstration and testing of microservice and cloud native technologies.
 
@@ -10,7 +10,7 @@ You can read more about the [application design](./internal-docs/design.md).
 
 ## Deployment Platforms
 
-The [deploy folder](./deploy/) contains scripts and instructions to provision the application onto your favourite platform. 
+The [deploy folder](./deploy/) contains scripts and instructions to provision the application onto your favourite platform.
 
 Please let us know if there is a platform that you would like to see supported.
 
@@ -28,4 +28,49 @@ Use [Weave Scope](http://weave.works/products/weave-scope/) or [Weave Cloud](htt
 
 ![Sock Shop in Weave Scope](https://github.com/microservices-demo/microservices-demo.github.io/raw/master/assets/sockshop-scope.png)
 
-## 
+## Installing and running the demo
+- Install minikube
+- Install kubectl
+
+```
+$ git clone https://github.com/microservices-demo/microservices-demo
+$ cd microservices-demo/
+$ minikube start --memory 8192
+$ minikube delete
+$ minikube config set memory 6144
+$ minikube start
+$ minikube ssh
+$ kubectl create -f deploy/kubernetes/manifests-logging
+$ kubectl create -f deploy/kubernetes/manifests/sock-shop-ns.yaml -f deploy/kubernetes/manifests
+$ watch kubectl get pods --namespace="sock-shop"
+```
+
+# Gatling: A Load Testing Tool
+
+Gatling is used to load test the demo microservices. Cloned from TassSinclair's performance and chaos repo.
+
+## Installing and running the tool against Sock Shop
+
+- Run Docker daemon
+```
+$ docker pull denvazh/gatling:2.3.1
+```
+- Create/put simulation script(s) in gatling/user-files/simulations
+```
+$ docker run -it --rm \
+  > -v "$(pwd)"/gatling/conf:/opt/gatling/conf \
+  > -v "$(pwd)"/gatling/user-files:/opt/gatling/user-files \
+  > -v "$(pwd)"/gatling/results:/opt/gatling/results/ \
+  > -e JAVA_OPTS="-Dusers=500 -Dduration=30 -Dhost=http://192.168.99.100:30001" \
+  > denvazh/gatling:2.3.1 \
+  > -s GatlingSimulation
+```
+
+## Notes about Gatling scripts
+- I assume /user-files is where docker find the Gatling simulations
+- Again, assuming, /results is where docker puts the results of the load tests
+- GatlingSimulation is the class inside gatling/user-files/simulations/Simulation.scala
+- -Dusers is how many users are simulated?
+- -Dduration; not sure if in seconds?
+- -Dhost is the address where Sock Shop microservices are running
+- TO-DO: Find out what -v, -e, and -s mean
