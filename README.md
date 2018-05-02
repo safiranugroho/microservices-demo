@@ -65,6 +65,7 @@ $ docker run -it --rm \
   > denvazh/gatling:2.3.1 \
   > -s GatlingSimulation
 ```
+- Open the report from gatling/results/gatlingsimulation-[randomly generated number]/index.html
 
 ## Notes about Gatling scripts
 - I assume /user-files is where docker find the Gatling simulations
